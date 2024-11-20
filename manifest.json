@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "Xtager - Twitter用户备注助手",
+  "version": "1.0.0",
+  "description": "为Twitter/X用户添加备注功能，支持普通、黄名单、黑名单分类管理",
+  "author": "www@qtch.com",
+  "icons": {
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    }
+  },
+  "permissions": [
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://twitter.com/*",
+    "https://x.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://twitter.com/*",
+        "https://x.com/*"
+      ],
+      "js": ["content.js"],
+      "css": ["styles.css"]
+    }
+  ],
+  "web_accessible_resources": [{
+    "resources": [
+      "data/normal_list.json",
+      "data/yellow_list.json",
+      "data/black_list.json"
+    ],
+    "matches": ["<all_urls>"]
+  }],
+  "background": {
+    "service_worker": "background.js"
+  }
+} 

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Xtager 设置</title>
+    <style>
+        :root {
+            --primary-color: #1da1f2;
+            --primary-hover: #1a91da;
+            --border-color: #e1e8ed;
+            --text-primary: #0f1419;
+            --text-secondary: #536471;
+            --bg-hover: #f7f9fa;
+            --bg-card: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            width: 320px;
+            padding: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-primary);
+            background: #f7f9fa;
+        }
+
+        .header {
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .title-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .stats-container {
+            background: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .button-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .button-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .button-secondary {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+        }
+
+        .button-secondary:hover {
+            background: white;
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        .icon {
+            width: 16px;
+            height: 16px;
+            opacity: 0.8;
+        }
+
+        .footer {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">
+            <img src="images/icon48.png" alt="Xtager" class="title-icon">
+            Xtager 设置
+        </div>
+    </div>
+
+    <div class="stats-container">
+        <div class="stat-item">
+            <div class="stat-label">
+                <span>📝</span>
+                <span>普通名单</span>
+            </div>
+            <div class="stat-value" id="normalCount">0</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">
+                <span>⚠️</span>
+                <span>黄名单</span>
+            </div>
+            <div class="stat-value" id="yellowCount">0</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">
+                <span>🚫</span>
+                <span>黑名单</span>
+            </div>
+            <div class="stat-value" id="blackCount">0</div>
+        </div>
+    </div>
+
+    <button class="button button-primary" id="openManager">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+        </svg>
+        打开管理页面
+    </button>
+
+    <button class="button button-secondary" id="exportData">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+        </svg>
+        导出数据
+    </button>
+
+    <div class="footer">
+        Version 1.0.0
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html> 

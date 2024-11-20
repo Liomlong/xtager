@@ -1,0 +1,21 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#1DA1F2;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#0D8EDA;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+    
+    <!-- 背景圆形 -->
+    <circle cx="64" cy="64" r="60" fill="url(#grad)" />
+    
+    <!-- 标签图形 -->
+    <path d="M40 38L88 38C92 38 95 41 95 45L95 83C95 87 92 90 88 90L40 90C36 90 33 87 33 83L33 45C33 41 36 38 40 38Z" 
+          fill="white" opacity="0.9"/>
+    
+    <!-- X标记 -->
+    <path d="M55 52L73 76M73 52L55 76" 
+          stroke="#1DA1F2" 
+          stroke-width="6" 
+          stroke-linecap="round"/>
+</svg> 
