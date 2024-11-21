@@ -2,67 +2,45 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Xtager 设置</title>
     <style>
-        :root {
-            --primary-color: #1da1f2;
-            --primary-hover: #1a91da;
-            --border-color: #e1e8ed;
-            --text-primary: #0f1419;
-            --text-secondary: #536471;
-            --bg-hover: #f7f9fa;
-            --bg-card: #ffffff;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            width: 320px;
-            padding: 16px;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            color: var(--text-primary);
-            background: #f7f9fa;
+            width: 300px;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
         }
 
         .header {
-            margin-bottom: 20px;
-            position: relative;
-            padding-bottom: 12px;
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        .title {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text-primary);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
-        .title-icon {
-            width: 24px;
-            height: 24px;
+        .header img {
+            width: 32px;
+            height: 32px;
         }
 
-        .stats-container {
-            background: var(--bg-card);
-            border-radius: 12px;
+        .header h1 {
+            margin: 0;
+            font-size: 20px;
+            color: #0f1419;
+        }
+
+        .stats-list {
+            background: white;
+            border-radius: 16px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            padding: 16px;
-            margin-bottom: 16px;
+            overflow: hidden;
+            margin-bottom: 20px;
         }
 
         .stat-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border-color);
+            padding: 16px;
+            border-bottom: 1px solid #eee;
         }
 
         .stat-item:last-child {
@@ -70,124 +48,100 @@
         }
 
         .stat-label {
-            color: var(--text-secondary);
-            font-size: 14px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            color: #0f1419;
+            font-size: 15px;
         }
 
         .stat-value {
             font-size: 16px;
             font-weight: 600;
-            color: var(--primary-color);
+            color: #1da1f2;
         }
 
         .button {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            text-align: center;
-            transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
         }
 
-        .button-primary {
-            background: var(--primary-color);
+        .primary-button {
+            background: #1da1f2;
             color: white;
         }
 
-        .button-primary:hover {
-            background: var(--primary-hover);
+        .primary-button:hover {
+            background: #1a91da;
             transform: translateY(-1px);
         }
 
-        .button-secondary {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-            border: 2px solid var(--border-color);
-        }
-
-        .button-secondary:hover {
+        .secondary-button {
             background: white;
-            border-color: var(--primary-color);
+            color: #0f1419;
+            border: 1px solid #eee;
+            text-decoration: none;
+        }
+
+        .secondary-button:hover {
+            background: #f8f9fa;
             transform: translateY(-1px);
         }
 
-        .icon {
-            width: 16px;
-            height: 16px;
-            opacity: 0.8;
-        }
-
-        .footer {
-            margin-top: 16px;
-            padding-top: 12px;
-            border-top: 1px solid var(--border-color);
+        .version {
             text-align: center;
-            font-size: 12px;
-            color: var(--text-secondary);
+            color: #536471;
+            font-size: 13px;
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <div class="title">
-            <img src="images/icon48.png" alt="Xtager" class="title-icon">
-            Xtager 设置
-        </div>
+        <img src="images/icon128.png" alt="Xtager">
+        <h1>Xtager 设置</h1>
     </div>
 
-    <div class="stats-container">
+    <div class="stats-list">
         <div class="stat-item">
             <div class="stat-label">
-                <span>📝</span>
-                <span>普通名单</span>
+                📝 普通名单
             </div>
             <div class="stat-value" id="normalCount">0</div>
         </div>
         <div class="stat-item">
             <div class="stat-label">
-                <span>⚠️</span>
-                <span>黄名单</span>
+                ⚠️ 黄名单
             </div>
             <div class="stat-value" id="yellowCount">0</div>
         </div>
         <div class="stat-item">
             <div class="stat-label">
-                <span>🚫</span>
-                <span>黑名单</span>
+                🚫 黑名单
             </div>
             <div class="stat-value" id="blackCount">0</div>
         </div>
     </div>
 
-    <button class="button button-primary" id="openManager">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
-        </svg>
-        打开管理页面
+    <button id="openManager" class="button primary-button">
+        ⚙️ 打开管理页面
     </button>
 
-    <button class="button button-secondary" id="exportData">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-        </svg>
-        导出数据
-    </button>
+    <a href="https://x.com/qkfdcom" target="_blank" class="button secondary-button">
+        👨‍💻 联系作者
+    </a>
 
-    <div class="footer">
-        Version 1.0.0
-    </div>
+    <div class="version">Version 1.0.0</div>
 
     <script src="popup.js"></script>
 </body>

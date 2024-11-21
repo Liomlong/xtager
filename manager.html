@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <title>Xtager 管理页面</title>
@@ -9,260 +9,134 @@
             --primary-hover: #1a91da;
             --danger-color: #dc3545;
             --danger-hover: #c82333;
+            --success-color: #28a745;
+            --success-hover: #218838;
+            --warning-color: #ffc107;
+            --warning-hover: #e0a800;
+            --bg-color: #f8f9fa;
             --border-color: #e1e8ed;
             --text-primary: #0f1419;
             --text-secondary: #536471;
-            --bg-hover: #f7f9fa;
-            --bg-card: #ffffff;
         }
 
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: #f7f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            line-height: 1.6;
             color: var(--text-primary);
-            line-height: 1.5;
+            padding: 30px;
+            background: var(--bg-color);
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 20px;
         }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        h1 {
             margin-bottom: 30px;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .title {
+            color: var(--text-primary);
             font-size: 28px;
             font-weight: 700;
-            color: var(--text-primary);
-            position: relative;
+            text-align: center;
         }
 
-        .title::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 0;
-            width: 40px;
-            height: 4px;
-            background: var(--primary-color);
-            border-radius: 2px;
-        }
-
+        /* 统计卡片样式 */
         .stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+            gap: 24px;
+            margin-bottom: 30px;
         }
 
         .stat-card {
-            background: var(--bg-card);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            text-align: center;
             transition: transform 0.2s;
-            min-width: 160px;
         }
 
         .stat-card:hover {
             transform: translateY(-2px);
         }
 
-        .stat-value {
-            font-size: 32px;
+        .stat-card h2 {
+            font-size: 36px;
             font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 4px;
+            margin-bottom: 8px;
         }
 
-        .stat-label {
+        .stat-card:nth-child(1) h2 { color: var(--primary-color); }
+        .stat-card:nth-child(2) h2 { color: var(--warning-color); }
+        .stat-card:nth-child(3) h2 { color: var(--danger-color); }
+
+        .stat-card p {
             color: var(--text-secondary);
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 500;
         }
 
-        .toolbar {
+        /* 搜索栏样式 */
+        .search-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
         }
 
-        .search-input {
+        input[type="text"] {
             flex: 1;
-            min-width: 200px;
             padding: 12px 16px;
             border: 2px solid var(--border-color);
             border-radius: 12px;
-            font-size: 14px;
+            font-size: 15px;
             transition: all 0.2s;
         }
 
-        .search-input:focus {
+        input[type="text"]:focus {
             border-color: var(--primary-color);
             outline: none;
             box-shadow: 0 0 0 3px rgba(29, 161, 242, 0.1);
         }
 
-        .filter-select {
+        select {
             padding: 12px 16px;
             border: 2px solid var(--border-color);
             border-radius: 12px;
-            font-size: 14px;
-            min-width: 140px;
+            font-size: 15px;
             background: white;
             cursor: pointer;
+            min-width: 140px;
+            transition: all 0.2s;
         }
 
-        .action-button {
+        select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(29, 161, 242, 0.1);
+        }
+
+        button {
             padding: 12px 24px;
             border: none;
             border-radius: 12px;
-            background: var(--primary-color);
-            color: white;
+            font-size: 15px;
             font-weight: 600;
-            font-size: 14px;
             cursor: pointer;
             transition: all 0.2s;
         }
 
-        .action-button:hover {
-            background: var(--primary-hover);
-            transform: translateY(-1px);
-        }
-
-        .action-button.danger {
-            background: var(--danger-color);
-        }
-
-        .action-button.danger:hover {
-            background: var(--danger-hover);
-        }
-
-        .table-container {
-            background: var(--bg-card);
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            overflow: hidden;
-            margin-bottom: 25px;
-        }
-
-        .notes-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .notes-table th {
-            text-align: left;
-            padding: 16px;
-            background: var(--bg-hover);
-            color: var(--text-secondary);
-            font-weight: 600;
-            font-size: 14px;
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        .notes-table td {
-            padding: 16px;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .notes-table td:first-child {
-            width: 200px;
-        }
-
-        .notes-table td:nth-child(2) {
-            max-width: 400px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .notes-table td:nth-child(3) {
-            width: 120px;
-        }
-
-        .notes-table td:last-child {
-            width: 180px;
-            text-align: right;
-        }
-
-        .notes-table tbody tr {
-            transition: all 0.2s;
-        }
-
-        .notes-table tbody tr:hover {
-            background: var(--bg-hover);
-        }
-
-        .table-action-button {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-left: 8px;
-        }
-
-        .table-action-button.edit {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .table-action-button.edit:hover {
-            background: var(--primary-hover);
-            transform: translateY(-1px);
-        }
-
-        .table-action-button.delete {
-            background: var(--danger-color);
-            color: white;
-        }
-
-        .table-action-button.delete:hover {
-            background: var(--danger-hover);
-            transform: translateY(-1px);
-        }
-
-        .user-link {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .user-link:hover {
-            color: var(--primary-hover);
-        }
-
-        .user-link svg {
-            width: 16px;
-            height: 16px;
-            opacity: 0.7;
-        }
-
+        /* 表格样式优化 */
         .note-type {
             display: inline-flex;
             align-items: center;
@@ -270,7 +144,7 @@
             border-radius: 20px;
             font-size: 13px;
             font-weight: 500;
-            line-height: 1;
+            white-space: nowrap;
         }
 
         .note-type.normal {
@@ -279,77 +153,176 @@
         }
 
         .note-type.yellow {
-            background: #fff5d6;
-            color: #ffa000;
+            background: #fff3cd;
+            color: #856404;
         }
 
         .note-type.black {
-            background: #ffebee;
-            color: var(--danger-color);
+            background: #f8d7da;
+            color: #721c24;
         }
 
-        .pagination-container {
-            background: var(--bg-card);
-            border-radius: 12px;
+        /* 操作按钮样式优化 */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+        }
+
+        .edit-btn {
+            background: #4CAF50;  /* 绿色 */
+        }
+
+        .edit-btn:hover {
+            background: #43A047;
+            transform: translateY(-1px);
+        }
+
+        .delete-btn {
+            background: #F44336;  /* 红色 */
+        }
+
+        .delete-btn:hover {
+            background: #E53935;
+            transform: translateY(-1px);
+        }
+
+        /* 表格样式 */
+        .table-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        th, td {
             padding: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .pagination-controls {
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            font-size: 15px;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* 用户链接样式 */
+        .user-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
             display: flex;
             align-items: center;
+            gap: 8px;
+        }
+
+        .user-link:hover {
+            text-decoration: underline;
+        }
+
+        /* 分页样式 */
+        .pagination {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: flex;
             justify-content: space-between;
-            gap: 16px;
+            align-items: center;
+            gap: 20px;
         }
 
         .pagination-left {
             display: flex;
             align-items: center;
-            gap: 12px;
-            min-width: 300px;
+            gap: 16px;
         }
 
         .pagination-center {
             display: flex;
             align-items: center;
-            gap: 8px;
-            justify-content: center;
-            flex: 1;
-        }
-
-        .pagination-right {
-            min-width: 200px;
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .page-size-select {
-            padding: 8px 12px;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 14px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: 120px;
-        }
-
-        .page-info {
-            color: var(--text-secondary);
-            font-size: 14px;
-            white-space: nowrap;
+            gap: 12px;
         }
 
         .page-numbers {
             display: flex;
+            gap: 8px;
+        }
+
+        .pagination-right {
+            display: flex;
             align-items: center;
-            gap: 4px;
+        }
+
+        .page-jump {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .page-jump input {
+            width: 80px;
+            padding: 8px 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .page-jump input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(29, 161, 242, 0.1);
+        }
+
+        .page-jump-button {
+            padding: 8px 16px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-jump-button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
         }
 
         .page-button {
-            min-width: 40px;
-            height: 40px;
-            padding: 0 12px;
+            padding: 8px 16px;
             border: 2px solid var(--border-color);
             border-radius: 8px;
             background: white;
@@ -358,12 +331,9 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        .page-button:hover:not(.active) {
+        .page-button:hover:not(:disabled) {
             border-color: var(--primary-color);
             color: var(--primary-color);
         }
@@ -374,154 +344,91 @@
             border-color: var(--primary-color);
         }
 
-        .page-jump-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .page-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
-        .page-jump {
-            width: 80px;
-            padding: 8px 12px;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 14px;
-            text-align: center;
-        }
-
-        .page-jump-button {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 8px;
-            background: var(--primary-color);
-            color: white;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .page-jump-button:hover {
-            background: var(--primary-hover);
-        }
-
-        @media (max-width: 1024px) {
-            .pagination-controls {
+        @media (max-width: 768px) {
+            .pagination {
                 flex-direction: column;
-                align-items: center;
-                gap: 20px;
+                align-items: stretch;
             }
 
-            .pagination-left, 
-            .pagination-center, 
+            .pagination-left,
+            .pagination-center,
             .pagination-right {
                 width: 100%;
                 justify-content: center;
-                min-width: auto;
             }
 
-            .pagination-left {
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            .page-size-select {
-                width: 100%;
-            }
-        }
-
-        @media (max-width: 640px) {
             .page-numbers {
                 overflow-x: auto;
                 padding-bottom: 4px;
-                max-width: 200px;
             }
         }
 
-        .export-dropdown {
-            position: relative;
-            display: inline-block;
+        /* 按钮样式 */
+        .export-btn {
+            background: var(--success-color);
+            color: white;
         }
 
-        .export-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            padding: 8px;
-            z-index: 1000;
-            min-width: 160px;
-            margin-top: 4px;
+        .export-btn:hover {
+            background: var(--success-hover);
+            transform: translateY(-1px);
         }
 
-        .export-dropdown:hover .export-menu {
-            display: block;
-        }
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
 
-        .export-option {
-            display: block;
-            width: 100%;
-            padding: 8px 16px;
-            border: none;
-            background: none;
-            text-align: left;
-            cursor: pointer;
-            font-size: 14px;
-            color: #0f1419;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
+            .search-bar {
+                flex-direction: column;
+            }
 
-        .export-option:hover {
-            background: #f7f9fa;
-            color: #1da1f2;
+            .pagination {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <div class="title">备注管理</div>
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-value" id="normalCount">0</div>
-                    <div class="stat-label">普通名单</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="yellowCount">0</div>
-                    <div class="stat-label">黄名单</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="blackCount">0</div>
-                    <div class="stat-label">黑名单</div>
-                </div>
+        <h1>备注管理</h1>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <h2 id="normalCount">0</h2>
+                <p>普通名单</p>
+            </div>
+            <div class="stat-card">
+                <h2 id="yellowCount">0</h2>
+                <p>黄名单</p>
+            </div>
+            <div class="stat-card">
+                <h2 id="blackCount">0</h2>
+                <p>黑名单</p>
             </div>
         </div>
 
-        <div class="toolbar">
-            <input type="text" class="search-input" placeholder="搜索用户名或备注内容">
-            <select class="filter-select">
-                <option value="all">全部名单</option>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="搜索用户名或备注内容">
+            <select id="filterSelect" class="filter-select">
+                <option value="all">全部</option>
                 <option value="normal">普通名单</option>
-                <option value="yellow" selected>黄名单</option>
+                <option value="yellow">黄名单</option>
                 <option value="black">黑名单</option>
             </select>
-            <div class="export-dropdown">
-                <button class="action-button" id="exportBtn">导出数据</button>
-                <div class="export-menu">
-                    <button class="export-option" data-type="all">导出全部</button>
-                    <button class="export-option" data-type="normal">导出普通名单</button>
-                    <button class="export-option" data-type="yellow">导出黄名单</button>
-                    <button class="export-option" data-type="black">导出黑名单</button>
-                </div>
-            </div>
+            <button id="exportBtn" class="export-btn">导出数据</button>
         </div>
 
         <div class="table-container">
-            <table class="notes-table">
+            <table>
                 <thead>
                     <tr>
                         <th>用户名</th>
@@ -530,47 +437,38 @@
                         <th>操作</th>
                     </tr>
                 </thead>
-                <tbody id="notesTableBody">
-                    <!-- 数据将通过JavaScript动态插入 -->
+                <tbody id="notesList">
+                    <!-- 数据将通过 JavaScript 动态插入 -->
                 </tbody>
             </table>
         </div>
 
-        <div class="pagination-container">
-            <div class="pagination-controls">
-                <div class="pagination-left">
-                    <select id="pageSize" class="page-size-select">
-                        <option value="50">50条/页</option>
-                        <option value="100">100条/页</option>
-                        <option value="200">200条/页</option>
-                        <option value="500">500条/页</option>
-                        <option value="1000">1000条/页</option>
-                    </select>
-                    <span class="page-info">第 1/57 页，共 2847 条</span>
+        <div class="pagination">
+            <div class="pagination-left">
+                <select id="itemsPerPage" class="page-size-select">
+                    <option value="50">50条/页</option>
+                    <option value="100">100条/页</option>
+                    <option value="200">200条/页</option>
+                    <option value="500">500条/页</option>
+                    <option value="1000">1000条/页</option>
+                </select>
+                <span class="page-info">第 <span id="currentPage">1</span>/<span id="totalPages">1</span> 页，共 <span id="totalItems">0</span> 条</span>
+            </div>
+            <div class="pagination-center">
+                <button id="prevPage" class="page-button">上一页</button>
+                <div class="page-numbers" id="pageNumbers">
+                    <!-- 页码按钮将通过 JavaScript 动态生成 -->
                 </div>
-                <div class="pagination-center">
-                    <button class="page-button" id="prevPage">上一页</button>
-                    <div class="page-numbers">
-                        <button class="page-button active">1</button>
-                        <button class="page-button">2</button>
-                        <button class="page-button">3</button>
-                        <button class="page-button">4</button>
-                        <button class="page-button">5</button>
-                        <span class="page-ellipsis">...</span>
-                        <button class="page-button">57</button>
-                    </div>
-                    <button class="page-button" id="nextPage">下一页</button>
-                </div>
-                <div class="pagination-right">
-                    <div class="page-jump-wrapper">
-                        <input type="number" id="pageJump" class="page-jump" placeholder="跳转页码">
-                        <button class="page-jump-button">跳转</button>
-                    </div>
+                <button id="nextPage" class="page-button">下一页</button>
+            </div>
+            <div class="pagination-right">
+                <div class="page-jump">
+                    <input type="number" id="pageJump" placeholder="跳转页码" min="1">
+                    <button id="jumpButton" class="page-jump-button">跳转</button>
                 </div>
             </div>
         </div>
     </div>
-
     <script src="manager.js"></script>
 </body>
 </html> 

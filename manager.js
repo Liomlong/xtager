@@ -1,7 +1,6 @@
 // 全局变量
 let currentPage = 1;
-let itemsPerPage = 50; // 默认每页50条
-const maxItemsPerPage = 1000; // 最大每页1000条
+let itemsPerPage = 50;
 let allNotes = {
     normal: [],
     yellow: [],
@@ -11,7 +10,7 @@ let allNotes = {
 // 初始化页面
 document.addEventListener('DOMContentLoaded', function() {
     // 设置默认选中黄名单
-    const filterSelect = document.querySelector('.filter-select');
+    const filterSelect = document.getElementById('filterSelect');
     if (filterSelect) {
         filterSelect.value = 'yellow';
     }
@@ -30,119 +29,123 @@ async function loadAllLists() {
             'black_list.json'
         ]);
 
-        // 确保数据存在且格式正确
+        // 如果数据不存在，初始化空数据
+        if (!result['normal_list.json']) {
+            result['normal_list.json'] = { users: [] };
+        }
+        if (!result['yellow_list.json']) {
+            result['yellow_list.json'] = { users: [] };
+        }
+        if (!result['black_list.json']) {
+            result['black_list.json'] = { users: [] };
+        }
+
+        // 更新全局数据
         allNotes = {
-            normal: (result['normal_list.json']?.users || []),
-            yellow: (result['yellow_list.json']?.users || []),
-            black: (result['black_list.json']?.users || [])
+            normal: result['normal_list.json'].users || [],
+            yellow: result['yellow_list.json'].users || [],
+            black: result['black_list.json'].users || []
         };
 
-        console.log('加载的数据:', allNotes);
-        
-        // 更新统计和显示
+        console.log('Loaded data:', allNotes);
+
+        // 更新统计数据
         updateStats();
+        // 渲染表格
         renderNotes();
     } catch (error) {
         console.error('加载数据失败:', error);
-        // 确保即使加载失败也初始化为空数组
-        allNotes = {
-            normal: [],
-            yellow: [],
-            black: []
-        };
+        // 显示错误信息给用户
         alert('加载数据失败，请刷新页面重试');
     }
 }
 
-// 更新统计数据
-function updateStats() {
-    const normalCount = document.getElementById('normalCount');
-    const yellowCount = document.getElementById('yellowCount');
-    const blackCount = document.getElementById('blackCount');
-
-    if (normalCount) normalCount.textContent = allNotes.normal?.length || 0;
-    if (yellowCount) yellowCount.textContent = allNotes.yellow?.length || 0;
-    if (blackCount) blackCount.textContent = allNotes.black?.length || 0;
-}
-
 // 渲染备注列表
 function renderNotes() {
-    const tbody = document.getElementById('notesTableBody');
-    if (!tbody) return; // 确保元素存在
+    const tbody = document.getElementById('notesList');
+    if (!tbody) return;
 
     tbody.innerHTML = '';
     
-    // 确保所有数组都存在
-    const allUsers = [
-        ...(allNotes.normal || []).map(user => ({...user, type: 'normal'})),
-        ...(allNotes.yellow || []).map(user => ({...user, type: 'yellow'})),
-        ...(allNotes.black || []).map(user => ({...user, type: 'black'}))
-    ];
+    // 获取当前筛选条件
+    const filterType = document.getElementById('filterSelect').value;
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
 
-    // 根据当前筛选条件过滤
-    const filterSelect = document.querySelector('.filter-select');
-    const searchInput = document.querySelector('.search-input');
-    
-    if (!filterSelect || !searchInput) return; // 确保元素存在
+    // 根据筛选条件获取数据
+    let filteredNotes = [];
+    if (filterType === 'all') {
+        filteredNotes = [
+            ...allNotes.normal.map(note => ({ ...note, type: 'normal' })),
+            ...allNotes.yellow.map(note => ({ ...note, type: 'yellow' })),
+            ...allNotes.black.map(note => ({ ...note, type: 'black' }))
+        ];
+    } else {
+        filteredNotes = allNotes[filterType].map(note => ({ ...note, type: filterType }));
+    }
 
-    const filterType = filterSelect.value;
-    const searchTerm = searchInput.value.toLowerCase();
-
-    const filteredUsers = allUsers.filter(user => {
-        const matchesFilter = filterType === 'all' || user.type === filterType;
-        const matchesSearch = user.user_id.toLowerCase().includes(searchTerm) || 
-                            user.tag.toLowerCase().includes(searchTerm);
-        return matchesFilter && matchesSearch;
-    });
+    // 搜索过滤
+    if (searchTerm) {
+        filteredNotes = filteredNotes.filter(note => 
+            note.user_id.toLowerCase().includes(searchTerm) || 
+            note.tag.toLowerCase().includes(searchTerm)
+        );
+    }
 
     // 分页处理
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const pageUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
+    const endIndex = startIndex + itemsPerPage;
+    const pageNotes = filteredNotes.slice(startIndex, endIndex);
 
-    // 渲染表格
-    pageUsers.forEach(user => {
+    // 渲染数据
+    pageNotes.forEach(note => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>
-                <a href="https://x.com/${user.user_id}" 
+                <a href="https://x.com/${note.user_id}" 
                    target="_blank" 
                    class="user-link">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                    </svg>
-                    @${user.user_id}
+                    @${note.user_id}
                 </a>
             </td>
-            <td>${user.tag}</td>
+            <td>${note.tag}</td>
             <td>
-                <span class="note-type ${user.type}">
-                    ${getTypeLabel(user.type)}
+                <span class="note-type ${note.type}">
+                    ${note.type === 'normal' ? '普通名单' : 
+                      note.type === 'yellow' ? '黄名单' : '黑名单'}
                 </span>
             </td>
             <td>
-                <button onclick="editNote('${user.user_id}', '${user.type}')" class="table-action-button edit">编辑</button>
-                <button onclick="deleteNote('${user.user_id}', '${user.type}')" class="table-action-button delete">删除</button>
+                <div class="action-buttons">
+                    <button class="edit-btn" data-userid="${note.user_id}" data-type="${note.type}">编辑</button>
+                    <button class="delete-btn" data-userid="${note.user_id}" data-type="${note.type}">删除</button>
+                </div>
             </td>
         `;
         tbody.appendChild(tr);
     });
     
-    updatePagination(filteredUsers.length);
+    // 更新分页信息
+    updatePagination(filteredNotes.length);
 }
 
-// 处理搜索
-function handleSearch(e) {
-    currentPage = 1;
-    renderNotes();
+// 更新统计数据
+function updateStats() {
+    document.getElementById('normalCount').textContent = allNotes.normal.length;
+    document.getElementById('yellowCount').textContent = allNotes.yellow.length;
+    document.getElementById('blackCount').textContent = allNotes.black.length;
 }
 
-// 处理筛选
-function handleFilter(e) {
-    currentPage = 1;
-    renderNotes();
+// 获取类型标签
+function getTypeLabel(type) {
+    switch (type) {
+        case 'normal': return '普通名单';
+        case 'yellow': return '黄名单';
+        case 'black': return '黑名单';
+        default: return '';
+    }
 }
 
-// 添加格式化日期的函数
+// 格式化日期函数
 function formatDate(timestamp) {
     const date = new Date(timestamp);
     const year = date.getFullYear();
@@ -155,27 +158,37 @@ function formatDate(timestamp) {
     return `${year}${month}${day}_${hour}${minute}${second}`;
 }
 
-// 修改导出数据的函数
-function exportData(type = 'all') {
+// 导出数据函数
+function exportData() {
     try {
-        let exportData = {};
+        // 获取当前筛选条件
+        const filterType = document.getElementById('filterSelect').value;
         const timestamp = formatDate(Date.now());
+        let exportData = {};
         let filename = '';
 
-        switch (type) {
+        // 根据筛选类型准备数据
+        switch (filterType) {
             case 'normal':
-                exportData = { normal_list: { users: allNotes.normal } };
+                exportData = {
+                    users: allNotes.normal
+                };
                 filename = `xtager_normal_list_${timestamp}.json`;
                 break;
             case 'yellow':
-                exportData = { yellow_list: { users: allNotes.yellow } };
+                exportData = {
+                    users: allNotes.yellow
+                };
                 filename = `xtager_yellow_list_${timestamp}.json`;
                 break;
             case 'black':
-                exportData = { black_list: { users: allNotes.black } };
+                exportData = {
+                    users: allNotes.black
+                };
                 filename = `xtager_black_list_${timestamp}.json`;
                 break;
             default:
+                // 导出所有数据
                 exportData = {
                     normal_list: { users: allNotes.normal },
                     yellow_list: { users: allNotes.yellow },
@@ -183,12 +196,13 @@ function exportData(type = 'all') {
                 };
                 filename = `xtager_all_lists_${timestamp}.json`;
         }
-        
+
+        // 创建 Blob 对象
         const dataStr = JSON.stringify(exportData, null, 2);
-        const blob = new Blob([dataStr], {type: 'application/json'});
-        const url = URL.createObjectURL(blob);
+        const blob = new Blob([dataStr], { type: 'application/json' });
         
         // 创建下载链接
+        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = filename;
@@ -202,62 +216,67 @@ function exportData(type = 'all') {
         URL.revokeObjectURL(url);
 
         // 显示成功提示
-        showNotification(`${getExportTypeName(type)}导出成功`, 'success');
+        showNotification('导出成功', 'success');
     } catch (error) {
         console.error('导出失败:', error);
         showNotification('导出失败，请重试', 'error');
     }
 }
 
-// 获取导出类型的中文名称
-function getExportTypeName(type) {
-    switch (type) {
-        case 'normal': return '普通名单';
-        case 'yellow': return '黄名单';
-        case 'black': return '黑名单';
-        default: return '全部名单';
-    }
-}
-
 // 添加通知函数
 function showNotification(message, type = 'info') {
+    // 移除现有通知
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+
+    // 创建新通知
     const notification = document.createElement('div');
-    notification.className = `xtager-notification ${type}`;
+    notification.className = `notification ${type}`;
     notification.textContent = message;
-    
+
+    // 添加样式
     const style = document.createElement('style');
     style.textContent = `
-        .xtager-notification {
+        .notification {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            padding: 12px 20px;
+            padding: 12px 24px;
             border-radius: 8px;
             color: white;
             font-size: 14px;
-            z-index: 10000;
-            animation: notificationSlide 0.3s ease-out;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
-        .xtager-notification.success {
-            background: #28a745;
+        .notification.success {
+            background: var(--success-color);
         }
 
-        .xtager-notification.error {
-            background: #dc3545;
+        .notification.error {
+            background: var(--danger-color);
         }
 
-        @keyframes notificationSlide {
-            from { transform: translateY(100px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        @keyframes slideIn {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
     `;
-    
+
     document.head.appendChild(style);
     document.body.appendChild(notification);
 
-    // 3秒后自动移除通知
+    // 3秒后移除通知
     setTimeout(() => {
         notification.style.opacity = '0';
         notification.style.transform = 'translateY(100px)';
@@ -269,566 +288,321 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-// 工具函数：获取类型标签
-function getTypeLabel(type) {
-    switch(type) {
-        case 'yellow': return '⚠️ 黄名单';
-        case 'black': return '🚫 黑名单';
-        default: return '普通名单';
-    }
-}
-
-// 更新分页
-function updatePagination(totalItems) {
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const paginationCenter = document.querySelector('.pagination-center');
-    if (!paginationCenter) return;
-
-    // 更新页码信息
-    const pageInfo = document.querySelector('.page-info');
-    if (pageInfo) {
-        pageInfo.textContent = `第 ${currentPage}/${totalPages} 页，共 ${totalItems} 条`;
-    }
-
-    // 如果总页数小于等于1，隐藏分页控件
-    if (totalPages <= 1) {
-        paginationCenter.style.display = 'none';
-        return;
-    }
-
-    paginationCenter.style.display = 'flex';
-
-    // 清空现有的页码按钮
-    const pageNumbers = paginationCenter.querySelector('.page-numbers');
-    if (pageNumbers) {
-        pageNumbers.innerHTML = '';
-    }
-
-    // 添加页码按钮
-    const addPageButton = (text, page, isActive = false) => {
-        const button = document.createElement('button');
-        button.className = `page-button${isActive ? ' active' : ''}`;
-        button.textContent = text;
-        if (page) {
-            button.onclick = () => {
-                currentPage = page;
-                renderNotes();
-            };
-        }
-        return button;
-    };
-
-    // 上一页按钮
-    const prevButton = paginationCenter.querySelector('#prevPage');
-    if (prevButton) {
-        prevButton.disabled = currentPage === 1;
-        prevButton.onclick = () => {
-            if (currentPage > 1) {
-                currentPage--;
-                renderNotes();
-            }
-        };
-    }
-
-    // 添加页码按钮
-    if (pageNumbers) {
-        let startPage = Math.max(1, currentPage - 2);
-        let endPage = Math.min(totalPages, startPage + 4);
-        
-        if (startPage > 1) {
-            pageNumbers.appendChild(addPageButton('1', 1));
-            if (startPage > 2) {
-                pageNumbers.appendChild(addPageButton('...', null));
-            }
-        }
-        
-        for (let i = startPage; i <= endPage; i++) {
-            pageNumbers.appendChild(addPageButton(i.toString(), i, i === currentPage));
-        }
-        
-        if (endPage < totalPages) {
-            if (endPage < totalPages - 1) {
-                pageNumbers.appendChild(addPageButton('...', null));
-            }
-            pageNumbers.appendChild(addPageButton(totalPages.toString(), totalPages));
-        }
-    }
-
-    // 下一页按钮
-    const nextButton = paginationCenter.querySelector('#nextPage');
-    if (nextButton) {
-        nextButton.disabled = currentPage === totalPages;
-        nextButton.onclick = () => {
-            if (currentPage < totalPages) {
-                currentPage++;
-                renderNotes();
-            }
-        };
-    }
-
-    // 设置页码输入框的最大值
-    const pageJump = document.getElementById('pageJump');
-    if (pageJump) {
-        pageJump.max = totalPages;
-    }
-}
-
-// 设置事件监听器
+// 设置事件监听
 function setupEventListeners() {
     // 搜索和筛选
-    const searchInput = document.querySelector('.search-input');
-    if (searchInput) {
-        searchInput.addEventListener('input', handleSearch);
-    }
-
-    const filterSelect = document.querySelector('.filter-select');
-    if (filterSelect) {
-        filterSelect.addEventListener('change', handleFilter);
-    }
-
-    // 导出按钮和选项
-    const exportOptions = document.querySelectorAll('.export-option');
-    exportOptions.forEach(option => {
-        option.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const type = this.dataset.type;
-            exportData(type);
-        });
+    document.getElementById('searchInput').addEventListener('input', renderNotes);
+    document.getElementById('filterSelect').addEventListener('change', renderNotes);
+    
+    // 分页控制
+    document.getElementById('itemsPerPage').addEventListener('change', function(e) {
+        itemsPerPage = parseInt(e.target.value);
+        currentPage = 1;
+        renderNotes();
     });
 
-    // 每页显示数量
-    const pageSizeSelect = document.getElementById('pageSize');
-    if (pageSizeSelect) {
-        pageSizeSelect.addEventListener('change', function() {
-            itemsPerPage = parseInt(this.value);
-            currentPage = 1;
+    document.getElementById('prevPage').addEventListener('click', function() {
+        if (currentPage > 1) {
+            currentPage--;
             renderNotes();
-        });
+        }
+    });
+
+    document.getElementById('nextPage').addEventListener('click', function() {
+        const totalPages = Math.ceil(getTotalItems() / itemsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+        renderNotes();
+        }
+    });
+
+    // 导出按钮
+    const exportBtn = document.getElementById('exportBtn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', exportData);
     }
 
     // 页码跳转
-    const pageJump = document.getElementById('pageJump');
-    const jumpButton = document.querySelector('.page-jump-button');
-    
-    if (pageJump && jumpButton) {
-        jumpButton.addEventListener('click', () => {
-            const page = parseInt(pageJump.value);
-            if (page && page > 0) {
-                jumpToPage(page);
-            }
-        });
+    const jumpButton = document.getElementById('jumpButton');
+    const pageJumpInput = document.getElementById('pageJump');
 
-        pageJump.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const page = parseInt(this.value);
-                if (page && page > 0) {
-                    jumpToPage(page);
-                }
+    jumpButton.addEventListener('click', () => {
+        const pageNum = parseInt(pageJumpInput.value);
+        if (pageNum && pageNum > 0) {
+            const totalPages = Math.ceil(getTotalItems() / itemsPerPage);
+            if (pageNum <= totalPages) {
+                currentPage = pageNum;
+                renderNotes();
+                pageJumpInput.value = '';
             }
-        });
-    }
+        }
+    });
 
-    // 监听来自 content script 的更新消息
-    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-        if (message.type === 'updateNotes') {
-            console.log('收到更新通知:', message.data);
-            loadAllLists(); // 重新加载数据
+    pageJumpInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            jumpButton.click();
+        }
+    });
+
+    // 添加编辑和删除按钮的事件委托
+    document.getElementById('notesList').addEventListener('click', async function(e) {
+        if (e.target.classList.contains('edit-btn')) {
+            const userId = e.target.dataset.userid;
+            const type = e.target.dataset.type;
+            openEditModal(userId, type);
+        } else if (e.target.classList.contains('delete-btn')) {
+            const userId = e.target.dataset.userid;
+            const type = e.target.dataset.type;
+            await deleteNote(userId, type);
         }
     });
 }
 
-// 添加跳页功能
-function jumpToPage(page) {
-    const totalPages = Math.ceil(getTotalFilteredItems() / itemsPerPage);
-    if (page > 0 && page <= totalPages) {
-        currentPage = page;
-        renderNotes();
-    } else {
-        alert(`请输入1-${totalPages}之间的页码`);
+// 获取总条数
+function getTotalItems() {
+    const filterType = document.getElementById('filterSelect').value;
+    if (filterType === 'all') {
+        return allNotes.normal.length + allNotes.yellow.length + allNotes.black.length;
     }
+    return allNotes[filterType].length;
 }
 
-// 获取筛选后的总条目数
-function getTotalFilteredItems() {
-    const filterType = document.querySelector('.filter-select').value;
-    const searchTerm = document.querySelector('.search-input').value.toLowerCase();
-
-    let allUsers = [
-        ...allNotes.normal.map(user => ({...user, type: 'normal'})),
-        ...allNotes.yellow.map(user => ({...user, type: 'yellow'})),
-        ...allNotes.black.map(user => ({...user, type: 'black'}))
-    ];
-
-    return allUsers.filter(user => {
-        const matchesFilter = filterType === 'all' || user.type === filterType;
-        const matchesSearch = user.user_id.toLowerCase().includes(searchTerm) || 
-                            user.tag.toLowerCase().includes(searchTerm);
-        return matchesFilter && matchesSearch;
-    }).length;
+// 更新分页信息
+function updatePagination(totalItems) {
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    document.getElementById('currentPage').textContent = currentPage;
+    document.getElementById('totalPages').textContent = totalPages;
+    document.getElementById('totalItems').textContent = totalItems;
+    
+    // 更新按钮状态
+    document.getElementById('prevPage').disabled = currentPage === 1;
+    document.getElementById('nextPage').disabled = currentPage === totalPages;
 }
 
-// 编辑备注
-async function editNote(username, type) {
-    try {
-        // 找到用户当前的备注信息
-        let userNote;
-        switch (type) {
-            case 'yellow':
-                userNote = allNotes.yellow.find(u => u.user_id === username);
-                break;
-            case 'black':
-                userNote = allNotes.black.find(u => u.user_id === username);
-                break;
-            default:
-                userNote = allNotes.normal.find(u => u.user_id === username);
-        }
+// 添加编辑模态框的函数
+async function openEditModal(userId, type) {
+    // 查找用户数据
+    const user = allNotes[type].find(note => note.user_id === userId);
+    if (!user) return;
 
-        if (!userNote) return;
-
-        // 创建并显示美化的编辑对话框
-        const dialog = document.createElement('div');
-        dialog.className = 'xtager-dialog';
-        dialog.innerHTML = `
-            <div class="xtager-dialog-content">
-                <div class="dialog-header">
-                    <div class="dialog-title">
-                        <span class="dialog-icon">✏️</span>
-                        <span class="dialog-text">
-                            <h3>编辑备注</h3>
-                            <p>@${username}</p>
-                        </span>
-                    </div>
+    // 创建模态框
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>编辑备注</h2>
+                <button class="close-btn" id="cancelEdit">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>用户ID:</label>
+                    <div class="user-id">@${userId}</div>
                 </div>
-                <div class="dialog-body">
-                    <div class="input-group">
-                        <input type="text" id="noteText" placeholder="输入备注内容" maxlength="50" 
-                               value="${userNote.tag}">
-                    </div>
-                    <div class="list-selector">
-                        <div class="list-option normal ${type === 'normal' ? 'active' : ''}" data-type="normal">
-                            <div class="option-content">
-                                <span class="option-icon">📝</span>
-                                <span class="option-text">普通名单</span>
-                            </div>
-                            <div class="option-check">✓</div>
-                        </div>
-                        <div class="list-option yellow ${type === 'yellow' ? 'active' : ''}" data-type="yellow">
-                            <div class="option-content">
-                                <span class="option-icon">⚠️</span>
-                                <span class="option-text">黄名单</span>
-                            </div>
-                            <div class="option-check">✓</div>
-                        </div>
-                        <div class="list-option black ${type === 'black' ? 'active' : ''}" data-type="black">
-                            <div class="option-content">
-                                <span class="option-icon">🚫</span>
-                                <span class="option-text">黑名单</span>
-                            </div>
-                            <div class="option-check">✓</div>
-                        </div>
-                    </div>
+                <div class="form-group">
+                    <label>备注:</label>
+                    <input type="text" id="editTag" value="${user.tag}" placeholder="请输入备注内容">
                 </div>
-                <div class="dialog-footer">
-                    <button id="cancelNote" class="dialog-button cancel">取消</button>
-                    <button id="saveNote" class="dialog-button save">保存</button>
+                <div class="form-group">
+                    <label>类型:</label>
+                    <select id="editType">
+                        <option value="normal" ${type === 'normal' ? 'selected' : ''}>普通名单</option>
+                        <option value="yellow" ${type === 'yellow' ? 'selected' : ''}>黄名单</option>
+                        <option value="black" ${type === 'black' ? 'selected' : ''}>黑名单</option>
+                    </select>
                 </div>
             </div>
-        `;
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelEdit">取消</button>
+                <button class="btn btn-primary" id="saveEdit">保存</button>
+            </div>
+        </div>
+    `;
 
-        // 添加样式
-        const dialogStyle = document.createElement('style');
-        dialogStyle.textContent = `
-            .xtager-dialog {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.5);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 10000;
-                backdrop-filter: blur(4px);
-            }
-
-            .xtager-dialog-content {
-                background: white;
-                width: 360px;
-                border-radius: 20px;
-                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-                overflow: hidden;
-                animation: dialogShow 0.2s ease-out;
-            }
-
-            @keyframes dialogShow {
-                from { transform: scale(0.95); opacity: 0; }
-                to { transform: scale(1); opacity: 1; }
-            }
-
-            .dialog-header {
-                padding: 20px;
-                border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-            }
-
-            .dialog-title {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-            }
-
-            .dialog-icon {
-                font-size: 24px;
-                width: 40px;
-                height: 40px;
-                background: #f7f9fa;
-                border-radius: 12px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .dialog-text h3 {
-                margin: 0;
-                font-size: 18px;
-                font-weight: 600;
-                color: #0f1419;
-            }
-
-            .dialog-text p {
-                margin: 4px 0 0 0;
-                font-size: 14px;
-                color: #536471;
-            }
-
-            .dialog-body {
-                padding: 20px;
-            }
-
-            .input-group {
-                margin-bottom: 16px;
-            }
-
-            .input-group input {
-                width: 100%;
-                padding: 12px 16px;
-                border: 2px solid #eee;
-                border-radius: 12px;
-                font-size: 14px;
-                transition: all 0.2s;
-            }
-
-            .input-group input:focus {
-                border-color: #1da1f2;
-                outline: none;
-                box-shadow: 0 0 0 3px rgba(29, 161, 242, 0.1);
-            }
-
-            .list-selector {
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            .list-option {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 12px 16px;
-                border: 2px solid #eee;
-                border-radius: 12px;
-                cursor: pointer;
-                transition: all 0.2s;
-                user-select: none;
-            }
-
-            .list-option:hover {
-                background: #f7f9fa;
-            }
-
-            .option-content {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-            }
-
-            .option-icon {
-                font-size: 16px;
-            }
-
-            .option-text {
-                font-size: 14px;
-                font-weight: 500;
-                color: #0f1419;
-            }
-
-            .option-check {
-                color: #1da1f2;
-                font-weight: bold;
+    // 更新样式
+    const style = document.createElement('style');
+    style.textContent = `
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            min-width: 400px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h2 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+        }
+        .close-btn:hover {
+            color: #333;
+        }
+        .modal-body {
+            padding: 20px;
+        }
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: #4a90e2;
+            outline: none;
+        }
+        .user-id {
+            padding: 10px 12px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            color: #666;
+            font-family: monospace;
+        }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #4a90e2;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #357abd;
+        }
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+        .btn-secondary:hover {
+            background: #e5e5e5;
+        }
+        @keyframes modalFadeIn {
+            from {
                 opacity: 0;
-                transition: all 0.2s;
+                transform: translateY(-20px);
             }
-
-            .list-option.active {
-                border-color: #1da1f2;
-                background: #f8faff;
-            }
-
-            .list-option.active .option-check {
+            to {
                 opacity: 1;
+                transform: translateY(0);
             }
+        }
+    `;
 
-            .list-option.yellow.active {
-                border-color: #ffa000;
-                background: #fff8e1;
-            }
+    document.head.appendChild(style);
+    document.body.appendChild(modal);
 
-            .list-option.yellow.active .option-check {
-                color: #ffa000;
-            }
+    // 保存按钮事件
+    document.getElementById('saveEdit').addEventListener('click', async () => {
+        const newTag = document.getElementById('editTag').value;
+        const newType = document.getElementById('editType').value;
+        await updateNote(userId, type, newTag, newType);
+        modal.remove();
+        style.remove();
+    });
 
-            .list-option.black.active {
-                border-color: #dc3545;
-                background: #fff5f5;
-            }
-
-            .list-option.black.active .option-check {
-                color: #dc3545;
-            }
-
-            .dialog-footer {
-                padding: 16px 20px;
-                border-top: 1px solid rgba(0, 0, 0, 0.06);
-                display: flex;
-                justify-content: flex-end;
-                gap: 12px;
-            }
-
-            .dialog-button {
-                padding: 10px 20px;
-                border: none;
-                border-radius: 20px;
-                font-size: 14px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.2s;
-            }
-
-            .dialog-button.cancel {
-                background: #f7f9fa;
-                color: #0f1419;
-            }
-
-            .dialog-button.cancel:hover {
-                background: #e1e8ed;
-            }
-
-            .dialog-button.save {
-                background: #1da1f2;
-                color: white;
-            }
-
-            .dialog-button.save:hover {
-                background: #1a91da;
-                transform: translateY(-1px);
-            }
-        `;
-
-        document.head.appendChild(dialogStyle);
-        document.body.appendChild(dialog);
-
-        // 绑定事件
-        let selectedType = type;
-
-        // 类型选择点击事件
-        const listOptions = dialog.querySelectorAll('.list-option');
-        listOptions.forEach(option => {
-            option.addEventListener('click', () => {
-                listOptions.forEach(opt => opt.classList.remove('active'));
-                option.classList.add('active');
-                selectedType = option.dataset.type;
-            });
+    // 取消按钮事件（包括关闭按钮）
+    modal.querySelectorAll('#cancelEdit').forEach(btn => {
+        btn.addEventListener('click', () => {
+            modal.remove();
+            style.remove();
         });
+    });
 
-        // 取消按钮
-        dialog.querySelector('#cancelNote').onclick = () => {
-            dialog.style.opacity = '0';
-            setTimeout(() => dialog.remove(), 200);
-        };
+    // 点击模态框外部关闭
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+            style.remove();
+        }
+    });
 
-        // 保存按钮
-        dialog.querySelector('#saveNote').onclick = async () => {
-            const text = dialog.querySelector('#noteText').value.trim();
-            if (text) {
-        // 更新备注
-                const targetFile = selectedType === 'yellow' ? 'yellow_list.json' : 
-                                selectedType === 'black' ? 'black_list.json' : 
-                         'normal_list.json';
-
-        const result = await chrome.storage.local.get([targetFile]);
-        let data = result[targetFile] || { users: [] };
-
-                // 从所有列表中移除该用户
-                const allFiles = ['normal_list.json', 'yellow_list.json', 'black_list.json'];
-                for (const file of allFiles) {
-                    const fileData = (await chrome.storage.local.get([file]))[file] || { users: [] };
-                    fileData.users = fileData.users.filter(u => u.user_id !== username);
-                    await chrome.storage.local.set({ [file]: fileData });
-                }
-
-                // 添加到新的列表
-        data.users.push({
-            user_id: username,
-                    tag: text
-        });
-
-        // 保存更新后的数据
-        await chrome.storage.local.set({ [targetFile]: data });
-
-                // 关闭话框
-                dialog.style.opacity = '0';
-                setTimeout(() => dialog.remove(), 200);
-
-        // 重新加载数据
-        await loadAllLists();
-            }
-        };
-
-        // 自动聚焦输入框
-        dialog.querySelector('#noteText').focus();
-
-    } catch (error) {
-        console.error('编辑备注失败:', error);
-        alert('编辑备注失败，请重试');
-    }
+    // 自动聚焦到输入框
+    document.getElementById('editTag').focus();
 }
 
-// 删除备注
-async function deleteNote(username, type) {
+// 更新备注的函数
+async function updateNote(userId, oldType, newTag, newType) {
     try {
-        if (!confirm(`确定要删除 @${username} 的备注吗？`)) return;
+        // 如果类型没变，只更新标签
+        if (oldType === newType) {
+            const index = allNotes[oldType].findIndex(note => note.user_id === userId);
+            if (index !== -1) {
+                allNotes[oldType][index].tag = newTag;
+            }
+        } else {
+            // 如果类型改变，需要移动到新类型
+            const userNote = allNotes[oldType].find(note => note.user_id === userId);
+            if (userNote) {
+                // 从旧类型中删除
+                allNotes[oldType] = allNotes[oldType].filter(note => note.user_id !== userId);
+                // 添加到新类型中
+                userNote.tag = newTag;
+                allNotes[newType].push(userNote);
+            }
+        }
 
-        // 确定目标文件
-        const targetFile = type === 'yellow' ? 'yellow_list.json' : 
-                         type === 'black' ? 'black_list.json' : 
-                         'normal_list.json';
+        // 保存到 storage
+        await chrome.storage.local.set({
+            'normal_list.json': { users: allNotes.normal },
+            'yellow_list.json': { users: allNotes.yellow },
+            'black_list.json': { users: allNotes.black }
+        });
 
-        // 从存储中获取数据
-        const result = await chrome.storage.local.get([targetFile]);
-        let data = result[targetFile] || { users: [] };
-
-        // 移除用户
-        data.users = data.users.filter(u => u.user_id !== username);
-
-        // 保存更新后的数据
-        await chrome.storage.local.set({ [targetFile]: data });
-
-        // 重新加载数据
-        await loadAllLists();
-
-        console.log('删除成功:', username);
+        // 更新显示
+        updateStats();
+        renderNotes();
+        showNotification('更新成功', 'success');
     } catch (error) {
-        console.error('删除备注失败:', error);
-        alert('删除备注失败，请重试');
+        console.error('更新失败:', error);
+        showNotification('更新失败，请重试', 'error');
     }
 } 
